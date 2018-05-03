@@ -23,7 +23,8 @@ class YahooQASpider(scrapy.Spider):
         'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
         'scrapy_fake_useragent.middleware.RandomUserAgentMiddleware': 400,
         }
-    } # employs a fake user agent 
+    } # employs a fake user agent
+
 
     def set_YMD(self):
         self.year = self.date.year
@@ -115,6 +116,9 @@ class YahooQASpider(scrapy.Spider):
         if self.fps_counter[fn_key] > 1:
             fp.write(",\n")
 
+        cat_path = '//*[@id="bcrmb"]/li[2]/a/span/text()'
+        subcat_path = '//*[@id="bcrmb"]/li[3]/a/span/text()'
+        subsubcat_path = '//*[@id="bcrmb"]/li[4]/a/span/text()'
         #que_path = ".//p[@class='yjDirectSLinkTarget']"
         que_path = "//*[@id='main']/div[1]/div[3]/div[2]/div[2]/p[1]/text()"
         desc_path = "//*[@id='main']/div[1]/div[3]/div[2]/div[2]/p[2]/text()"
@@ -122,7 +126,10 @@ class YahooQASpider(scrapy.Spider):
         #bestans_path = "//*[@id='ba']//p[@class='queTxt yjDirectSLinkTarget']"
         othrans_path = "//div[@id='ans']//p[@class='queTxt']" # by me
         other_ans = []
-        
+
+        cat = self.merge_text(response.xpath(cat_path).extract(), qa_id, "cat")
+        subcat = self.merge_text(response.xpath(subcat_path).extract(), qa_id, "subcat")
+        subsubcat = self.merge_text(response.xpath(subsubcat_path).extract(), qa_id, "subsubcat")
         que = self.merge_text(response.xpath(que_path).extract(), qa_id, "que")
         desc = self.merge_text(response.xpath(desc_path).extract(), qa_id, "desc")
         bestans = self.merge_text(response.xpath(bestans_path).extract(), qa_id, "bestans")
@@ -131,6 +138,9 @@ class YahooQASpider(scrapy.Spider):
             
         fp.write(json.dumps({
             "qa_id": qa_id.strip(),
+            "cat": cat.strip(),
+            "sub_cat": subcat.strip(),
+            "subsub_cat": subsubcat.strip(),
             "qn_title": que.strip(),
             "qn_desc": desc.strip(),
             "best_ans": bestans.strip(),
